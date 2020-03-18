@@ -1,0 +1,6 @@
+{
+    "bot_connected": "Bot connected to Discord",
+    "ping": "ping!",
+    "pong": "pong!",
+    "whoami": "You're <@%{userID}>."
+}

@@ -1,0 +1,6 @@
+{
+    "bot_connected": "Bot telah terhubung ke Discord",
+    "ping": "ping!",
+    "pong": "pong!",
+    "whoami": "Kamu kan <@%{userID}>."
+}
