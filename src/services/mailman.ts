@@ -1,10 +1,6 @@
 import { TextChannel } from 'discord.js'
 import logger from '../helpers/LoggerHelper'
 
-export class SendOpt {
-    public quote = false
-}
-
 class Mailman {
     public sendToTextChannel(channel: TextChannel, message: string): boolean {
         let status = false

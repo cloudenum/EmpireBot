@@ -1,18 +1,18 @@
 import i18nLoader from '../../i18n/i18n'
-import { SendOpt } from '../mailman'
+import { Message, PartialMessage } from 'discord.js'
+import { IProduct } from '../../interfaces/IProduct'
 
 i18nLoader.setLocale('en')
-
-export interface IProduct {
-    data: any,
-    sendOpt?: SendOpt
-}
 
 export default class Bot {
     private working = false
     private i18n = i18nLoader.getPolyglot()
 
-    public execute(command: string): IProduct {
+    public greetNewGuild(): string {
+        return this.i18n.t('greet_new_guild')
+    }
+
+    public execute(command: string, messageObj?: Message | PartialMessage): IProduct {
         this.working = true
         let args = command.split(' ')
         args = args.splice(0, 1)
@@ -21,7 +21,7 @@ export default class Bot {
             case 'ping':
                 return this.ping()
             case 'whoami':
-                return this.whoami(args[0])
+                return this.whoami(messageObj.author.id)
             case 'add':
                 return this.add(parseInt(args[0]), parseInt(args[1]))
             case 'change-locale':
@@ -37,7 +37,7 @@ export default class Bot {
         i18nLoader.setLocale(localeID)
         this.i18n = i18nLoader.getPolyglot()
 
-        return { data: `Locale has been set to ${localeID}` }
+        return { data: this.i18n.t('locale_change_success') }
     }
 
     public isWorking(): boolean {

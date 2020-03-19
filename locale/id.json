@@ -2,5 +2,7 @@
     "bot_connected": "Bot telah terhubung ke Discord",
     "ping": "ping!",
     "pong": "pong!",
-    "whoami": "Kamu kan <@%{userID}>."
+    "whoami": "Kamu kan <@%{userID}>.",
+    "greet_new_guild": "Hey aku disini gayn hehe\nAku dibikin sama <@459553197225279539>",
+    "locale_change_success": "Bahasa telah diubah ke Bahasa Indonesia"
 }

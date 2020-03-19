@@ -2,8 +2,11 @@ import dotenv from 'dotenv'
 import { Client, TextChannel } from 'discord.js'
 import logger from "./helpers/LoggerHelper"
 import i18nLoader from './i18n/i18n'
-import Bot, { IProduct } from './services/bot/bot'
+import Bot from './services/bot/bot'
+import { IProduct } from "./interfaces/IProduct"
 import mailman from './services/mailman'
+
+logger.info('Bot initializing ..')
 
 dotenv.config()
 
@@ -14,8 +17,7 @@ const client = new Client()
 const bot = new Bot()
 
 client.on('ready', () => {
-    logger.info(i18n.t('bot_connected'))
-    logger.info(`Logged in as ${client.user.username} - (${client.user.id})`)
+    logger.info('Bot is ready!')
 })
 
 client.on('guildCreate', guild => {
@@ -23,7 +25,7 @@ client.on('guildCreate', guild => {
         ch => ch.name === 'general'
     )
 
-    channel.send('Hey aku disini gayn hehe \nAku dibikin sama <@>')
+    mailman.sendToTextChannel(channel, bot.greetNewGuild())
 })
 
 client.on('message', message => {
@@ -32,14 +34,32 @@ client.on('message', message => {
         logger.info(`Receiving command from ${message.author.username} - (${message.author.id})`)
         logger.info(`The command is ${cmd}`)
 
-        let product: IProduct = bot.execute(cmd)
-        if (product.sendOpt.quote) {
-            let quote = mailman.createQuote(message.content)
-            mailman.sendToTextChannel(<TextChannel>message.channel, `${quote}\n${product.data}`)
+        let product: IProduct = bot.execute(cmd, message)
+        if (product.sendOpt) {
+            if (product.sendOpt.quote) {
+                let quote = mailman.createQuote(message.content)
+                mailman.sendToTextChannel(<TextChannel>message.channel, `${quote}\n${product.data}`)
+            } else {
+                mailman.sendToTextChannel(<TextChannel>message.channel, `${product.data}`)
+            }
+        } else {
+            mailman.sendToTextChannel(<TextChannel>message.channel, `${product.data}`)
         }
 
         logger.info('Command execution finished.')
     }
 })
 
+logger.info('Logging in to Discord...')
+
 client.login(process.env.DISCORD_TOKEN)
+    .then(() => {
+        logger.info('Login success!')
+    })
+    .catch(err => {
+        logger.error("Login failed!")
+        logger.error(err)
+        logger.info('Bot stopped.')
+    })
+
+logger.info('Init finished.')

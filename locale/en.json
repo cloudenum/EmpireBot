@@ -2,5 +2,7 @@
     "bot_connected": "Bot connected to Discord",
     "ping": "ping!",
     "pong": "pong!",
-    "whoami": "You're <@%{userID}>."
+    "whoami": "You're <@%{userID}>.",
+    "greet_new_guild": "Hey!\nMade by <@459553197225279539>",
+    "locale_change_success": "Languange has been changed to English"
 }
