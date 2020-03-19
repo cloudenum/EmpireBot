@@ -1,18 +1,14 @@
 import dotenv from 'dotenv'
 import { Client, TextChannel } from 'discord.js'
-import logger from "./helpers/LoggerHelper"
-import i18nLoader from './i18n/i18n'
-import Bot from './services/bot/bot'
-import { IProduct } from "./interfaces/IProduct"
-import mailman from './services/mailman'
+import { Logger as logger } from "./helpers"
+import { Bot, BotProduct, Mailman } from './services'
+import { BotError } from './error'
 
 logger.info('Bot initializing ..')
 
 dotenv.config()
 
-i18nLoader.setLocale('en')
-const i18n = i18nLoader.getPolyglot()
-
+const mailman = new Mailman()
 const client = new Client()
 const bot = new Bot()
 
@@ -33,17 +29,27 @@ client.on('message', message => {
         let cmd = message.content.substring(2)
         logger.info(`Receiving command from ${message.author.username} - (${message.author.id})`)
         logger.info(`The command is ${cmd}`)
-
-        let product: IProduct = bot.execute(cmd, message)
-        if (product.sendOpt) {
-            if (product.sendOpt.quote) {
-                let quote = mailman.createQuote(message.content)
-                mailman.sendToTextChannel(<TextChannel>message.channel, `${quote}\n${product.data}`)
+        try {
+            let product: BotProduct = bot.execute(cmd, message)
+            if (product.sendOpt) {
+                if (product.sendOpt.quote) {
+                    let quote = mailman.createQuote(message.content)
+                    mailman.sendToTextChannel(<TextChannel>message.channel, `${quote}\n${product.data}`)
+                } else {
+                    mailman.sendToTextChannel(<TextChannel>message.channel, `${product.data}`)
+                }
             } else {
                 mailman.sendToTextChannel(<TextChannel>message.channel, `${product.data}`)
             }
-        } else {
-            mailman.sendToTextChannel(<TextChannel>message.channel, `${product.data}`)
+        } catch (err) {
+            if (err instanceof BotError) {
+                mailman.sendToTextChannel(<TextChannel>message.channel, err.message)
+            } else {
+                logger.error(err)
+                throw err; //unknown error
+            }
+
+            logger.error(err)
         }
 
         logger.info('Command execution finished.')

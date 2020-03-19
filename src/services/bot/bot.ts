@@ -1,19 +1,22 @@
-import i18nLoader from '../../i18n/i18n'
 import { Message, PartialMessage } from 'discord.js'
-import { IProduct } from '../../interfaces/IProduct'
+import { I18nLoader } from '../../i18n'
+import { BotError } from "../../error";
+import { BotProduct } from './BotProduct'
 
-i18nLoader.setLocale('en')
+I18nLoader.setLocale('en')
 
-export default class Bot {
+export class Bot {
     private working = false
-    private i18n = i18nLoader.getPolyglot()
+    private i18n = I18nLoader.getPolyglot()
+    private command: string = ''
 
     public greetNewGuild(): string {
         return this.i18n.t('greet_new_guild')
     }
 
-    public execute(command: string, messageObj?: Message | PartialMessage): IProduct {
+    public execute(command: string, messageObj?: Message | PartialMessage): BotProduct {
         this.working = true
+        this.command = command
         let args = command.split(' ')
         args = args.splice(0, 1)
 
@@ -33,9 +36,13 @@ export default class Bot {
         this.working = false
     }
 
-    public changeLocale(localeID: string): IProduct {
-        i18nLoader.setLocale(localeID)
-        this.i18n = i18nLoader.getPolyglot()
+    public changeLocale(localeID: string): BotProduct {
+        if (!localeID) {
+            throw new BotError(this.i18n.t('no_argument', { arguments: "<localeID>" }), this.command)
+        }
+
+        I18nLoader.setLocale(localeID)
+        this.i18n = I18nLoader.getPolyglot()
 
         return { data: this.i18n.t('locale_change_success') }
     }
@@ -44,18 +51,18 @@ export default class Bot {
         return this.working
     }
 
-    public ping(): IProduct {
+    public ping(): BotProduct {
         return { data: this.i18n.t('pong') }
     }
 
-    public whoami(userID: string): IProduct {
+    public whoami(userID: string): BotProduct {
         return {
             data: this.i18n.t('whoami', { userID: userID }),
             sendOpt: { quote: true }
         }
     }
 
-    public add(a: number, b: number): IProduct {
+    public add(a: number, b: number): BotProduct {
         return {
             data: a + b,
             sendOpt: { quote: true }

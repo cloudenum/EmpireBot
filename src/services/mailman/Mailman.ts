@@ -1,7 +1,7 @@
 import { TextChannel } from 'discord.js'
-import logger from '../helpers/LoggerHelper'
+import { Logger as logger } from '../../helpers'
 
-class Mailman {
+export class Mailman {
     public sendToTextChannel(channel: TextChannel, message: string): boolean {
         let status = false
         channel.send(message)
@@ -16,5 +16,3 @@ class Mailman {
     }
 
 }
-
-export default new Mailman()
