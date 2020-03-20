@@ -9,9 +9,9 @@ export class I18nLoader {
     private static localeID: string = 'en'
 
     public static load() {
-        fs.readdirSync('/Makaryo/EmpireBot/locale').forEach(file => {
+        fs.readdirSync(path.join(__dirname, `./locales`)).forEach(file => {
             let localeID = file.split('.json', 1)[0]
-            let filepath = path.join(__dirname, `../../locale/${localeID}.json`)
+            let filepath = path.join(__dirname, `./locales/${file}`)
             let rawJSON = fs.readFileSync(filepath)
 
             this.locales.push({
