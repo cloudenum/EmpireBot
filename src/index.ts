@@ -1,71 +1,105 @@
-import dotenv from 'dotenv'
-import { Client, TextChannel } from 'discord.js'
+import { env } from "./helpers"
+import { Client, TextChannel, Guild } from 'discord.js'
 import { Logger as logger } from "./helpers"
-import { Bot, BotProduct, Mailman } from './services'
-import { BotError } from './error'
+import {
+    Bot,
+    BotProduct,
+    Mailman,
+    DbPromise,
+    BotError
+} from './system'
+import { Guilds } from './models'
 
-logger.info('Bot initializing ..')
+(async () => {
+    logger.info('Bot initializing...')
 
-dotenv.config()
+    const mailman = new Mailman()
+    const client = new Client()
+    const bot = new Bot()
+    const DbClient = await DbPromise.then(cl => cl)
 
-const mailman = new Mailman()
-const client = new Client()
-const bot = new Bot()
+    if (!DbClient.isConnected()) {
+        logger.error(`Can't connect to Database`)
+        logger.info(`Bot shutting down...`)
+        return
+    }
 
-client.on('ready', () => {
-    logger.info('Bot is ready!')
-})
+    if (Guilds.checkIDExist('2131241894'))
+        Guilds.insert({
+            guild_id: 13241,
+            name: '1asdasd',
+            ownerID: 1234124,
+        })
 
-client.on('guildCreate', guild => {
-    const channel = <TextChannel>guild.channels.cache.find(
-        ch => ch.name === 'general'
-    )
+    client.on('ready', () => {
+        logger.info('Bot is ready!')
+    })
 
-    mailman.sendToTextChannel(channel, bot.greetNewGuild())
-})
-
-client.on('message', message => {
-    if (message.content.substring(0, 2) === 'e!') {
-        let cmd = message.content.substring(2)
-        logger.info(`Receiving command from ${message.author.username} - (${message.author.id})`)
-        logger.info(`The command is ${cmd}`)
+    client.on('guildCreate', guild => {
         try {
-            let product: BotProduct = bot.execute(cmd, message)
-            if (product.sendOpt) {
-                if (product.sendOpt.quote) {
-                    let quote = mailman.createQuote(message.content)
-                    mailman.sendToTextChannel(<TextChannel>message.channel, `${quote}\n${product.data}`)
-                } else {
-                    mailman.sendToTextChannel(<TextChannel>message.channel, `${product.data}`)
-                }
-            } else {
-                mailman.sendToTextChannel(<TextChannel>message.channel, `${product.data}`)
+            logger.info(`Bot joined to ${guild.name} - (${guild.id})`)
+            if (Guilds.checkIDExist('2131241894'))
+                Guilds.insert({
+                    guild_id: guild.id,
+                    name: guild.name,
+                    ownerID: guild.ownerID,
+                })
+            const channel = guild.channels.cache.first()
+
+            if (channel) {
+                logger.info(`${guild.name} greeted!`)
+                mailman.sendToTextChannel(<TextChannel>channel, bot.greetNewGuild())
             }
         } catch (err) {
-            if (err instanceof BotError) {
-                mailman.sendToTextChannel(<TextChannel>message.channel, err.message)
-            } else {
-                logger.error(err)
-                throw err; //unknown error
-            }
-
-            logger.error(err)
+            logger.error(err.stack)
+            logger.info(`Guild ${guild.name} - (${guild.id}) doesn't have a text channel?`)
         }
-
-        logger.info('Command execution finished.')
-    }
-})
-
-logger.info('Logging in to Discord...')
-
-client.login(process.env.DISCORD_TOKEN)
-    .then(() => {
-        logger.info('Login success!')
-    })
-    .catch(err => {
-        logger.error("Login failed!")
-        logger.error(err)
-        logger.info('Bot stopped.')
     })
 
-logger.info('Init finished.')
+    client.on('message', message => {
+        if (message.content && message.author && message.channel) {
+            if (message.content.substring(0, 2) === 'e!') {
+                let cmd = message.content.substring(2)
+                logger.info(`Receiving command from ${message.author.username} - (${message.author.id})`)
+                logger.info(`The command is ${cmd}`)
+
+                try {
+                    let product: BotProduct = bot.execute(cmd, message)
+
+                    if (product.sendOpt.quote) {
+                        let quote = mailman.createQuote(message.content)
+                        mailman.sendToTextChannel(<TextChannel>message.channel, `${quote}\n${product.data}`)
+                    } else {
+                        mailman.sendToTextChannel(<TextChannel>message.channel, `${product.data}`)
+                    }
+                } catch (err) {
+                    if (err instanceof BotError) {
+                        mailman.sendToTextChannel(<TextChannel>message.channel, err.message)
+                    } else {
+                        logger.error(err.stack)
+                        throw err; //unknown error
+                    }
+
+                    logger.error(err.message)
+                }
+
+                logger.info('Command execution finished.')
+            }
+        }
+    })
+
+    logger.info('Init finished.')
+    logger.info('Logging in to Discord...')
+
+    client.login(env.DISCORD_TOKEN)
+        .then(() => {
+            logger.info('Login success!')
+        })
+        .catch(err => {
+            logger.error("Login failed!")
+            logger.error(err)
+            logger.error(err.stack)
+            logger.info('See logs/errors.log for more details')
+            logger.info(`Bot shutting down...`)
+        })
+})()

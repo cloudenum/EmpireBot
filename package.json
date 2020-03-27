@@ -8,19 +8,24 @@
     },
     "main": "./dist/index.js",
     "scripts": {
-        "start": "node ./dist/index.js",
+        "build": "tsc",
+        "start": "node ./dist/index.js --unhandled-rejections=strict",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [],
     "author": "Zeeber",
     "license": "MIT",
     "dependencies": {
+        "@types/mongodb": "^3.5.2",
         "@types/node": "^13.9.1",
         "@types/ws": "^7.2.2",
         "discord.js": "^12.0.2",
         "dotenv": "^8.2.0",
+        "mongodb": "^3.5.5",
         "node-polyglot": "^2.4.0",
-        "winston": "^3.2.1"
+        "systemjs": "^6.2.6",
+        "winston": "^3.2.1",
+        "yenv": "^2.1.1"
     },
     "devDependencies": {
         "@types/node-polyglot": "^0.4.34"

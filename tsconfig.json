@@ -7,8 +7,10 @@
         "preserveConstEnums": true,
         "rootDir": "src/",
         "outDir": "dist",
-        "sourceMap": true,
-        "esModuleInterop": true
+        "declaration": true,
+        "strict": true,
+        "esModuleInterop": true,
+        "moduleResolution": "Node"
     },
     "include": [
         "src/**/*"

@@ -3,5 +3,5 @@ logs/*
 dist/*
 src/playground/*
 
-.env
+env.yaml
 *.log

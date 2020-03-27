@@ -5,5 +5,7 @@
     "whoami": "You're <@%{userID}>.",
     "greet_new_guild": "Hey!\nMade by <@459553197225279539>",
     "locale_change_success": "Languange has been changed to English",
-    "no_argument": "Please provide %{arguments} parameter"
+    "locale_change_not_found": "Sorry, i can't find a languange for %{newLocale} :(",
+    "no_argument": "Please provide %{arguments} parameter",
+    "unknown_command": "Unknown command!"
 }
