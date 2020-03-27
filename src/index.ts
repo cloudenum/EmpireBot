@@ -1,50 +1,45 @@
 import { env } from "./helpers"
-import { Client, TextChannel, Guild } from 'discord.js'
+import { Client, TextChannel } from 'discord.js'
 import { Logger as logger } from "./helpers"
 import {
     Bot,
     BotProduct,
     Mailman,
     DbPromise,
-    BotError
+    BotError,
+    DBError
 } from './system'
 import { Guilds } from './models'
 
 (async () => {
-    logger.info('Bot initializing...')
+    logger.info('Bot is initializing...')
 
     const mailman = new Mailman()
     const client = new Client()
     const bot = new Bot()
     const DbClient = await DbPromise.then(cl => cl)
 
-    if (!DbClient.isConnected()) {
+    if (!DbClient || !DbClient.isConnected()) {
         logger.error(`Can't connect to Database`)
-        logger.info(`Bot shutting down...`)
-        return
+        logger.info(`Bot is shutting down...`)
+        process.exit(1)
     }
-
-    if (Guilds.checkIDExist('2131241894'))
-        Guilds.insert({
-            guild_id: 13241,
-            name: '1asdasd',
-            ownerID: 1234124,
-        })
 
     client.on('ready', () => {
         logger.info('Bot is ready!')
     })
 
-    client.on('guildCreate', guild => {
+    client.on('guildCreate', async guild => {
         try {
             logger.info(`Bot joined to ${guild.name} - (${guild.id})`)
-            if (Guilds.checkIDExist('2131241894'))
+            if (!(await Guilds.checkIDExist(guild.id))) {
                 Guilds.insert({
                     guild_id: guild.id,
                     name: guild.name,
                     ownerID: guild.ownerID,
                 })
-            const channel = guild.channels.cache.first()
+            }
+            const channel = guild.channels.cache.find(ch => ch.type === "text")
 
             if (channel) {
                 logger.info(`${guild.name} greeted!`)
@@ -100,6 +95,7 @@ import { Guilds } from './models'
             logger.error(err)
             logger.error(err.stack)
             logger.info('See logs/errors.log for more details')
-            logger.info(`Bot shutting down...`)
+            logger.info(`Bot is shutting down...`)
+            process.exit(1)
         })
 })()

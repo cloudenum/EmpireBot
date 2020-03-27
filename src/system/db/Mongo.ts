@@ -10,7 +10,6 @@ const DbPromise = DbClient.connect().then((cl) => {
     return cl
 }).catch(err => {
     logger.error(`DB Error > ${err.message}`)
-    throw new DBError(err.message)
 })
 
 export { DbPromise, DbClient }

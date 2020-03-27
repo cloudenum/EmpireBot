@@ -1,13 +1,26 @@
 import { BaseModel } from "../system";
+import { Logger } from "../helpers";
 
 class GuildsModel extends BaseModel {
     constructor() {
         super('guilds')
     }
 
-    public checkIDExist(id: string): boolean {
-        console.log(Guilds.find({ guild_id: id }, { projection: { 'guild_id': 1, 'name': 0, 'ownerID': 0 } }))
-        return true
+    public async checkIDExist(id: string): Promise<boolean> {
+        return await this.find({ guild_id: id }, { projection: { 'guild_id': 1 } })
+            .limit(1).count() > 0 ? true : false
+        // .toArray()
+        // .then(res => {
+        //     console.log(res)
+        //     if (res.length > 0)
+        //         return true
+        //     else
+        //         return false
+        // })
+        // .catch(err => {
+        //     Logger.error(err.stack)
+        //     throw err
+        // })
     }
 }
 
